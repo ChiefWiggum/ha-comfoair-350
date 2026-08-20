@@ -43,11 +43,16 @@ The RainbowLink enumerates as a WCH "USB Quad Serial" in **CDC-ACM** mode — na
 supported by HAOS, no extra driver needed. All four channels appear:
 
 ```
+/dev/serial/by-id/usb-1a86_USB_Serial-if00-port0             -> ttyUSB0   <-- other adapter, NOT the ComfoAir
 /dev/serial/by-id/usb-wch.cn_USB_Quad_Serial_0123456789-if00 -> ttyACM0
 /dev/serial/by-id/usb-wch.cn_USB_Quad_Serial_0123456789-if02 -> ttyACM1   <-- RS232 channel
 /dev/serial/by-id/usb-wch.cn_USB_Quad_Serial_0123456789-if04 -> ttyACM2
 /dev/serial/by-id/usb-wch.cn_USB_Quad_Serial_0123456789-if06 -> ttyACM3
 ```
+
+(Verbatim from the machine, 2026-08-20 — see `docs/ENVIRONMENT.md`. The
+`usb-1a86_…` entry is a separate CH340 adapter on the same Pi; picking it by
+mistake gives a silent, dataless link.)
 
 **Always use the `by-id` path, not the bare `/dev/ttyACM1`.** The four channels can renumber
 across reboots, but the `by-id` (`if02`) path always tracks the same physical RS232 channel.

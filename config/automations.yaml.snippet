@@ -1,5 +1,8 @@
 # Append to /config/automations.yaml (or create via the Automations UI).
 # Starts the bridge ~2 minutes after Home Assistant finishes booting.
+#
+# HISTORY: retired venv method. On the live machine this was automation
+# id '1783465654554' - delete it when switching to the ca350_bridge add-on.
 - alias: Start ca350 bridge on HA start
   triggers:
     - event: start

@@ -53,7 +53,7 @@ the app's Documentation tab). Release flow:
 | Serial path | `/dev/serial/by-id/usb-wch.cn_USB_Quad_Serial_0123456789-if02` (= ttyACM1) |
 | Bridge | adorobis/hacomfoairmqtt (`ca350.py`) in the add-on container |
 | HA link | MQTT (Mosquitto add-on) + MQTT autodiscovery |
-| Wall panel | CC-Luxe left connected; `enable_pc_mode: true` hands the bus to the PC port |
+| Wall panel | CC-Luxe left connected; `enable_pc_mode: false` was enough to read every value |
 
 ## Repo layout
 
@@ -70,6 +70,7 @@ ca350_bridge/                       the add-on
   translations/                     option labels for the HA UI (en, de)
 docs/
   PUBLISHING.md                     add-on repository + release flow
+  ENVIRONMENT.md                    verified snapshot of the live machine (2026-08-20)
   SETUP.md                          full board-specific setup runbook
   WIRING.md                         DB9 "RS232 - P.C." wiring + serial-device ID
   TROUBLESHOOTING.md                every issue hit, in order, with the fix
@@ -78,6 +79,7 @@ lovelace/
 tools/
   serial_sniffer.py                 passive multi-port listener to find the RS232 channel
 config/                             HISTORY: the old /config venv method (see below)
+                                    config.ini.example is the real file, scrubbed
 ```
 
 ## `ca350.py` is not vendored here

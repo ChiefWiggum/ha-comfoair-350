@@ -1,5 +1,9 @@
 # Add this top-level block to /config/configuration.yaml
 #
+# HISTORY: this is the retired venv method. Option A below is verbatim what ran
+# on the machine until 2026-08-20 (see docs/ENVIRONMENT.md). Remove this block
+# when switching to the ca350_bridge add-on.
+#
 # Why setsid + </dev/null + redirects + &:
 #   HA's shell_command waits for the command to finish and kills it after 60s.
 #   The bridge runs forever, so a plain `... &` still timed out (shell_command

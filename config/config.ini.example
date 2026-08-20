@@ -1,25 +1,56 @@
-# hacomfoairmqtt configuration for ComfoAir 350 CH L Luxe
-# Copy to /config/custom_components/ca350/config.ini and fill in the MQTT section.
-# NOTE: field names follow the upstream ca350.py / config.ini.dist — if a newer
-# upstream version renames a key, match the upstream sample, not this file.
+# hacomfoairmqtt config.ini — the file that actually ran on this machine,
+# exported 2026-08-20, with the MQTT credentials replaced by placeholders.
+#
+# HISTORY: this belongs to the retired /config venv method. The add-on in
+# ca350_bridge/ generates an equivalent file from its options; you only need
+# this one if you run ca350.py by hand. See docs/ENVIRONMENT.md.
+#
+# All four sections are required: ca350.py reads config['DEVICE'] and
+# config['HA'] directly, so a file with only [DEFAULT] and [MQTT] dies with a
+# KeyError. Key names follow upstream src/config.ini.dist.
 
 [DEFAULT]
 # RS232 channel of the RainbowLink (WCH Quad Serial). Use the by-id path, NOT ttyACMx.
 SerialPort=/dev/serial/by-id/usb-wch.cn_USB_Quad_Serial_0123456789-if02
 # 350 Luxe PC port is RS232, not RS485:
 RS485_protocol=False
-# Hand bus control to the PC port so the CC-Luxe wall panel can stay connected:
-enablePcMode=True
+# Interval in seconds at which data is polled
 refresh_interval=10
+# PC mode disables the CC-Luxe/ComfoSense panel's control of the bus. This ran
+# as False and still published all values; enable it only if Home Assistant
+# cannot change fan level or temperature while the panel is attached.
+enablePcMode=False
 debug=False
 
+[DEVICE]
+# Fan percentage per level, as set on this unit
+FanOutAbsent=15
+FanOutLow=25
+FanOutMid=40
+FanOutHigh=70
+FanInAbsent=15
+FanInLow=25
+FanInMid=40
+FanInHigh=70
+SetUpFanLevelsAtStart=True
+
 [MQTT]
+# 127.0.0.1 works for the venv method (bridge runs on the HAOS host).
+# From inside an add-on container use core-mosquitto instead.
 MQTTServer=127.0.0.1
 MQTTPort=1883
 MQTTKeepalive=45
 MQTTUser=REPLACE_ME
 MQTTPassword=REPLACE_ME_SHORT_SIMPLE
 
+[HA]
 # Autodiscovery
 HAEnableAutoDiscoverySensors=True
 HAEnableAutoDiscoveryClimate=True
+
+# Device identity in Home Assistant. HAAutoDiscoveryDeviceId is the entity
+# prefix: ca350 -> sensor.ca350_outsidetemp, climate.ca350_climate.
+HAAutoDiscoveryDeviceId=ca350
+HAAutoDiscoveryDeviceName=CA350
+HAAutoDiscoveryDeviceManufacturer=Zehnder
+HAAutoDiscoveryDeviceModel=ComfoAir 350

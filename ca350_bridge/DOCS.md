@@ -34,9 +34,11 @@ that way, and it restarts on boot without a `shell_command` or an automation.
    `ls -l /dev/serial/by-id/` (SSH add-on) or Settings -> System -> Hardware
    lists the candidates. Never use the bare `/dev/ttyACM1` — the four channels of
    a quad adapter can renumber across reboots.
-4. Leave `rs485_protocol` **off** (the ComfoAir 350 DB9 "RS232 - P.C." port is
-   true RS232) and `enable_pc_mode` **on** (hands bus control to the PC port so
-   the CC-Luxe wall panel can stay connected).
+4. Leave `rs485_protocol` **off** — the ComfoAir 350 DB9 "RS232 - P.C." port is
+   true RS232. Leave `enable_pc_mode` **off** to start with: the setup this
+   add-on replaces published every value with PC mode off, and off leaves the
+   CC-Luxe wall panel in control of the bus. Turn it on only if Home Assistant
+   cannot *change* fan level or temperature.
 5. Start the add-on, enable **Start on boot** and **Watchdog**, and watch the log.
 
 A **CA350** device appears under Settings -> Devices & Services -> MQTT with
@@ -50,7 +52,7 @@ entities named after `device_id`: `climate.ca350_climate`,
 |---|---|---|
 | `serial_port` | `/dev/ttyUSB0` | Serial device; use a `/dev/serial/by-id/...` path. |
 | `rs485_protocol` | `false` | `true` only for an RS485 connection. |
-| `enable_pc_mode` | `true` | Disables the ComfoSense / CC-Luxe bus master so the PC port can write. |
+| `enable_pc_mode` | `false` | Disables the ComfoSense / CC-Luxe bus master so the PC port can write. Needed only if writes from HA do not take effect. |
 | `refresh_interval` | `10` | Seconds between polls. |
 | `mqtt_broker` | *(empty)* | `host` or `host:port`. Empty = Supervisor / Mosquitto auto-detect. |
 | `mqtt_user`, `mqtt_password` | *(empty)* | Empty = auto-detected Mosquitto credentials. |

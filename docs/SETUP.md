@@ -1,6 +1,10 @@
 # Setup runbook — ComfoAir 350 CH L Luxe on HAOS (Pi 5)
 
-Full procedure for the working configuration in this repo.
+> **HISTORY.** This is the retired `/config` venv + `shell_command` method. It
+> worked, then broke on every HAOS update (`TROUBLESHOOTING.md` #7). Use the
+> add-on instead: `ca350_bridge/DOCS.md`. Kept because the hardware steps (1-2)
+> and the verification steps (6-7) still apply, and because the machine ran
+> exactly this until 2026-08-20 — see `ENVIRONMENT.md`.
 
 ## 0. Prerequisites in Home Assistant
 1. Install the **Mosquitto broker** add-on; start it.
@@ -41,7 +45,7 @@ python3 -m venv /config/custom_components/ca350/python3venv
 Edit `/config/custom_components/ca350/config.ini` (from `config/config.ini.example`):
 - `SerialPort=` the `by-id` `if02` path
 - `RS485_protocol=False`
-- `enablePcMode=True`
+- `enablePcMode=False` (what actually ran; see `ENVIRONMENT.md`)
 - `HAEnableAutoDiscoverySensors=True`, `HAEnableAutoDiscoveryClimate=True`
 - MQTT server/user/password
 

@@ -19,7 +19,7 @@ services:
 options:
   serial_port: /dev/ttyUSB0
   rs485_protocol: false
-  enable_pc_mode: true
+  enable_pc_mode: false
   refresh_interval: 10
   mqtt_broker: ""
   mqtt_user: ""

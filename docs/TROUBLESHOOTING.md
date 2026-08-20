@@ -105,6 +105,12 @@ Also confirm `HAEnableAutoDiscoverySensors=True` in `config.ini`.
 `ImportError: Error relocating /usr/lib/python3.14/.../array...musl.so: _PyType_AllocNoTrack:
 symbol not found`. Card empty. Rebuilding the venv fixes it — until the next reboot.
 
+The log exported on 2026-08-20 was **1252 lines: 139 copies of this one traceback and
+nothing else**, the runner relaunching every 15 s into the same import failure. Note the
+path in the error — `/usr/lib/python3.14/lib-dynload/...` — the venv's packages loading
+against an interpreter that lives outside the venv. Full excerpt and the environment it
+ran in: `docs/ENVIRONMENT.md`.
+
 **Cause:** the venv lives in `/config` (persistent) but borrows the SSH add-on's Python
 interpreter and C-extensions, which live inside that add-on's container. When HAOS rebuilds
 the add-on (updates/reboots), those musl binaries change and the `/config` venv points at a

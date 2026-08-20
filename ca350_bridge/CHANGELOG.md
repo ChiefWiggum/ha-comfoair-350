@@ -11,6 +11,8 @@ Initial release.
   the recurring `_PyType_AllocNoTrack` venv rot of the `/config` venv method
   (see `docs/TROUBLESHOOTING.md` #7).
 - Builds for aarch64 and amd64 (Home Assistant dropped armv7 in 2025.12).
+- Option defaults taken from the configuration exported off the running machine
+  on 2026-08-20 (`docs/ENVIRONMENT.md`), including `enable_pc_mode: false`.
 - All four upstream config sections are exposed as options: serial port /
   protocol / PC mode, per-level supply and exhaust fan percentages, MQTT, and the
   discovery device identity (`device_id`, `device_name`, `device_model`).

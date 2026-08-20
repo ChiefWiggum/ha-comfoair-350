@@ -14,7 +14,8 @@ Run the adorobis/hacomfoairmqtt bridge (ca350.py) reliably on Home Assistant OS
 - USB: WCH "USB Quad Serial" (CDC-ACM), native in HAOS.
 - Serial path (STABLE, use this): `/dev/serial/by-id/usb-wch.cn_USB_Quad_Serial_0123456789-if02`
   (= ttyACM1). Verified: clean `07 f0` status frames + `07 f3` ACKs on this channel.
-- Wall panel (CC-Luxe) can stay connected; `enable_pc_mode: true`.
+- Wall panel (CC-Luxe) can stay connected. The live config ran `enablePcMode=False`
+  and still published all values, so the add-on defaults it off (see docs/ENVIRONMENT.md).
 
 ## What works
 - Serial link + wiring: confirmed good (sniffer showed valid frames).
