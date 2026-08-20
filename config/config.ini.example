@@ -1,0 +1,25 @@
+# hacomfoairmqtt configuration for ComfoAir 350 CH L Luxe
+# Copy to /config/custom_components/ca350/config.ini and fill in the MQTT section.
+# NOTE: field names follow the upstream ca350.py / config.ini.dist — if a newer
+# upstream version renames a key, match the upstream sample, not this file.
+
+[DEFAULT]
+# RS232 channel of the RainbowLink (WCH Quad Serial). Use the by-id path, NOT ttyACMx.
+SerialPort=/dev/serial/by-id/usb-wch.cn_USB_Quad_Serial_0123456789-if02
+# 350 Luxe PC port is RS232, not RS485:
+RS485_protocol=False
+# Hand bus control to the PC port so the CC-Luxe wall panel can stay connected:
+enablePcMode=True
+refresh_interval=10
+debug=False
+
+[MQTT]
+MQTTServer=127.0.0.1
+MQTTPort=1883
+MQTTKeepalive=45
+MQTTUser=REPLACE_ME
+MQTTPassword=REPLACE_ME_SHORT_SIMPLE
+
+# Autodiscovery
+HAEnableAutoDiscoverySensors=True
+HAEnableAutoDiscoveryClimate=True
