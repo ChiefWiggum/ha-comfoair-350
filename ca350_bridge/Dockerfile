@@ -2,8 +2,8 @@ ARG BUILD_FROM=ghcr.io/home-assistant/aarch64-base:3.21
 FROM ${BUILD_FROM}
 
 # Pinned upstream commit of adorobis/hacomfoairmqtt (master).
-# To update: change the hash, bump 'version' in config.yaml, push -> the
-# GitHub Actions workflow builds and publishes the new image to GHCR.
+# To update: change the hash, bump 'version' in config.yaml, then rebuild the
+# add-on in Home Assistant.
 ARG CA350_COMMIT=dc44e4f86c3390301353d0444c544e229a18f85a
 
 # Own Python inside the image: it cannot rot the way a /config venv does

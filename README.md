@@ -5,9 +5,6 @@ A Home Assistant OS app wrapping
 <-> MQTT bridge for **Zehnder ComfoAir 350 / 500** ventilation units, with Home
 Assistant MQTT discovery.
 
-The image is built for aarch64 and amd64 by GitHub Actions and published to
-GHCR, so installing pulls an image instead of building one on your Pi.
-
 > Since Home Assistant 2026.2, add-ons are called **apps** in the UI
 > (Settings -> Apps). Nothing changed technically — this repository works the
 > same way as before, and the developer docs still say "add-on".
@@ -22,7 +19,8 @@ config values, and the problems hit along the way with their fixes.
 1. Install the **Mosquitto broker** app and set up the **MQTT integration**.
 2. Settings -> Apps -> **App Store** -> (three-dot menu) -> **Repositories**
    -> add `https://github.com/ChiefWiggum/ha-comfoair-350`.
-3. Install **ComfoAir 350 Bridge**.
+3. Install **ComfoAir 350 Bridge** (the image is built on your machine;
+   a few minutes on a Pi 5).
 4. In the app's Configuration tab set `serial_port` to your adapter — prefer a
    `/dev/serial/by-id/...` path (Settings -> System -> Hardware). Leave the MQTT
    options empty; Mosquitto is auto-detected.
@@ -31,8 +29,12 @@ config values, and the problems hit along the way with their fixes.
    `climate.ca350_climate`, `sensor.ca350_outsidetemp` and friends.
 
 Full documentation: [`ca350_bridge/DOCS.md`](ca350_bridge/DOCS.md) (also shown in
-the app's Documentation tab). Publishing / release flow:
+the app's Documentation tab). Release flow:
 [`docs/PUBLISHING.md`](docs/PUBLISHING.md).
+
+> Alternative without GitHub: copy the `ca350_bridge/` folder into the `/addons`
+> share of your HAOS machine (Samba app) and it appears in the store under the
+> local section.
 
 > Coming from the old `/config` venv + `shell_command` method? Remove the
 > autostart automation and the `shell_command: start_ca350` block **before**
@@ -59,16 +61,15 @@ the app's Documentation tab). Publishing / release flow:
 repository.yaml                     add-on repository manifest
 LICENSE                             MIT (same as upstream hacomfoairmqtt)
 ca350_bridge/                       the add-on
-  config.yaml                       options, schema, uart, mqtt, GHCR image
+  config.yaml                       options, schema, uart, mqtt
   build.yaml                        base images per architecture
   Dockerfile                        own Python + pinned upstream ca350.py
   run.sh                            options -> config.ini, MQTT auto-detect, launch
   DOCS.md                           user documentation (Documentation tab)
   CHANGELOG.md
   translations/                     option labels for the HA UI (en, de)
-.github/workflows/build.yaml        lint + multi-arch build + push to GHCR
 docs/
-  PUBLISHING.md                     repo/GHCR setup and release flow
+  PUBLISHING.md                     add-on repository + release flow
   SETUP.md                          full board-specific setup runbook
   WIRING.md                         DB9 "RS232 - P.C." wiring + serial-device ID
   TROUBLESHOOTING.md                every issue hit, in order, with the fix

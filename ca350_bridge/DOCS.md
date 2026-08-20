@@ -21,8 +21,8 @@ that way, and it restarts on boot without a `shell_command` or an automation.
 
 1. Settings -> Apps (Add-ons) -> **App Store** -> three-dot menu ->
    **Repositories** -> add `https://github.com/ChiefWiggum/ha-comfoair-350`.
-2. Install **ComfoAir 350 Bridge**. The image is pulled from GHCR, so this takes
-   seconds rather than the minutes a local build needs on a Pi.
+2. Install **ComfoAir 350 Bridge** (the image is built on your machine;
+   a few minutes on a Pi 5).
 3. Open **Configuration** and set `serial_port`. Prefer the stable by-id path —
    for the DFRobot RainbowLink (WCH Quad Serial) used in this project that is the
    RS232 channel:
@@ -103,8 +103,7 @@ instances kick each other off the broker in an endless reconnect loop:
 `ca350.py` is fetched at image build time from a **pinned upstream commit**
 (`CA350_COMMIT` in the Dockerfile), so rebuilds are reproducible. To move to a
 newer upstream version: change the hash, bump `version` in `config.yaml`, and
-push — the GitHub Actions workflow publishes the new image to GHCR and Home
-Assistant offers the update.
+push — Home Assistant then offers the update and rebuilds the image.
 
 ## Credits
 

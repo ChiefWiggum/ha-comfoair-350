@@ -1,102 +1,87 @@
-# Publishing: GitHub repo + multi-arch image on GHCR
+# Publishing: the add-on repository
 
-This repo is now a **Home Assistant add-on repository** in the same shape as
-[`ha-optolink-splitter`](https://github.com/ChiefWiggum/ha-optolink-splitter)
-(`repository.yaml` at the root, one folder per add-on), with one addition: the
-image is **not** built on the Pi. GitHub Actions builds it for aarch64 and
-amd64 and pushes it to GHCR, and `config.yaml` points Home Assistant at
-that image.
+This repo is a **Home Assistant add-on repository**, same shape as
+[`ha-optolink-splitter`](https://github.com/ChiefWiggum/ha-optolink-splitter):
+`repository.yaml` at the root, one folder per add-on. The Supervisor clones the
+repo and **builds the image on the HAOS machine** from the add-on's `Dockerfile`
+and `build.yaml` — no registry, no CI, nothing to publish beyond a `git push`.
 
 ```
 repository.yaml                     add-on repository manifest (name, url, maintainer)
 LICENSE                             MIT (same as upstream hacomfoairmqtt)
 ca350_bridge/
-  config.yaml                       manifest: options, schema, uart, mqtt, image:
-  build.yaml                        per-arch base images + OCI labels
+  config.yaml                       manifest: options, schema, uart, mqtt
+  build.yaml                        base image per architecture
   Dockerfile                        own Python + pinned upstream ca350.py
   run.sh                            options -> config.ini, MQTT auto-detect, launch
   DOCS.md                           shown in the add-on Documentation tab
   CHANGELOG.md
   translations/{en,de}.yaml          option labels in the HA UI
-.github/workflows/build.yaml        lint + multi-arch build + push to GHCR
 ```
 
-## Assumptions baked into the files
-
-| Thing | Value | Where to change it |
-|---|---|---|
-| GitHub repo | `ChiefWiggum/ha-comfoair-350` | `repository.yaml`, `ca350_bridge/config.yaml` (`url`), `ca350_bridge/build.yaml` (label), `DOCS.md` |
-| Image name | `ghcr.io/chiefwiggum/ca350-bridge-{arch}` | `ca350_bridge/config.yaml` (`image`), `.github/workflows/build.yaml` (`IMAGE_NAME`) |
-| Add-on slug | `ca350_bridge` | folder name + `slug` in `config.yaml` |
-
-GHCR image names must be lowercase, hence `chiefwiggum`. The workflow lowercases
-`github.repository_owner` itself, so a fork publishes under its own owner without
-edits; only the `image:` line in `config.yaml` is hardcoded.
+Architectures: **aarch64** (Pi 5) and **amd64**. armv7 is deliberately absent —
+Home Assistant dropped it in 2025.12, and the add-on linter flags it.
 
 ## One-time setup
 
-1. Push to the repo (`ChiefWiggum/ha-comfoair-350`):
+1. Push to `ChiefWiggum/ha-comfoair-350`:
 
    ```bash
-   git remote add origin https://github.com/ChiefWiggum/ha-comfoair-350.git
    git push -u origin main
    ```
 
-   The repo has to be **public**. Home Assistant's Supervisor clones an add-on
-   repository anonymously, so a private one cannot be added in the App Store —
-   it fails with a clone error, before any image is involved.
+   The repo has to be **public**: the Supervisor clones an add-on repository
+   anonymously, so a private one cannot be added in the App Store at all.
 
-2. Watch **Actions -> Build and publish add-on image**. Two jobs
-   (aarch64, amd64) each push `ca350-bridge-<arch>:1.0.0` and `:latest`.
-   armv7 is not built: Home Assistant dropped that architecture in 2025.12.
-   The workflow needs no secrets — it uses the built-in `GITHUB_TOKEN` with
-   `packages: write`.
-
-3. **Make the packages public.** A new GHCR package inherits the repository's
-   visibility at first publish, and the Supervisor pulls anonymously, so an
-   install would otherwise fail with `unauthorized`. Package visibility is set
-   per package and can be public even if the repo were not.
-   For each of the two packages: profile -> **Packages** ->
-   `ca350-bridge-aarch64` -> **Package settings** -> **Change visibility** ->
-   **Public**. While there, **Connect repository** links the package to the repo
-   (the `org.opencontainers.image.source` label in `build.yaml` does this
-   automatically on most pushes).
-
-4. In Home Assistant: Settings -> Apps -> **App Store** -> three-dot menu ->
+2. In Home Assistant: Settings -> Apps -> **App Store** -> three-dot menu ->
    **Repositories** -> add `https://github.com/ChiefWiggum/ha-comfoair-350`.
-   **ComfoAir 350 Bridge** appears and installs by pulling the image.
+   **ComfoAir 350 Bridge** appears; installing builds the image on the Pi (a few
+   minutes, mostly `apk add python3` plus two pip wheels).
 
 ## Releasing a new version
 
-The Supervisor compares the `version` in `config.yaml` with the installed one, and
-the image tag *is* that version — so the two must move together:
+The Supervisor compares the `version` in `config.yaml` with the installed one, so
+that field is what triggers an update:
 
-1. Change what you need (options, `run.sh`, or `CA350_COMMIT` in the Dockerfile
-   to follow upstream).
+1. Change what you need (options, `run.sh`, or `CA350_COMMIT` in the Dockerfile to
+   follow upstream).
 2. Bump `version` in `ca350_bridge/config.yaml`.
-3. Add a `CHANGELOG.md` entry (shown in the update dialog).
-4. Commit and push to `main`. The workflow builds and pushes the new tag; Home
-   Assistant offers the update within an hour, or immediately after
-   **App Store -> three-dot menu -> Check for updates**.
+3. Add a `CHANGELOG.md` entry — it is shown in the update dialog.
+4. Commit and push to `main`. Home Assistant offers the update within an hour, or
+   immediately after **App Store -> three-dot menu -> Check for updates**.
 
-Pull requests build both architectures with `--test` and push nothing, so a
-broken Dockerfile is caught before it reaches GHCR.
+Updating rebuilds the image, which re-runs the `ADD` of `ca350.py` at the pinned
+commit — so an unchanged `CA350_COMMIT` really does give the same script back.
 
-The workflow's `lint` job (`frenck/action-addon-linter`) gates the build: if it
-flags `config.yaml`, nothing is published. It also emits warnings for the missing
-`icon.png` / `logo.png` — warnings do not fail the run. Drop the `needs: lint`
-line if you ever want a build to go out despite a lint failure.
+## Local copy instead of the GitHub repo
 
-## Local build instead of GHCR
+To try a change without pushing, copy the `ca350_bridge/` folder into the HAOS
+`/addons` share (Samba app). It shows up in the store under the local section and
+builds from exactly the same files.
 
-To test a change on the Pi without going through GitHub, copy the `ca350_bridge/`
-folder into the HAOS `/addons` share (Samba add-on) **and delete the `image:`
-line** from the copy's `config.yaml`. Without that line the Supervisor builds the
-image locally from the Dockerfile — the same code path the `ha-optolink-splitter`
-add-on uses for all of its installs.
+## Checking changes before you push
+
+There is no CI, so a `config.yaml` typo surfaces as a failed install. Cheap local
+checks:
+
+```bash
+bash -n ca350_bridge/run.sh
+```
+
+```bash
+python -c "import yaml,sys; [yaml.safe_load(open(f,encoding='utf-8')) for f in sys.argv[1:]]" ca350_bridge/config.yaml ca350_bridge/build.yaml ca350_bridge/translations/en.yaml ca350_bridge/translations/de.yaml repository.yaml
+```
+
+The keys under `options` and `schema` in `config.yaml` and both translation files
+have to agree, or the UI shows raw key names.
+
+Two rules the Home Assistant add-on linter enforced on this add-on, worth
+remembering when editing `config.yaml`: a key set to its default value is
+rejected (`boot: auto` is the default, so it must be omitted), and `armv7` is no
+longer a valid architecture. Both also apply to the `ha-optolink-splitter`
+add-on, which predates those rules.
 
 ## Secrets
 
-Nothing secret is committed: MQTT credentials come from the add-on options or the
-Supervisor MQTT service at runtime, never from a file in this repo. The workflow
-uses only `GITHUB_TOKEN`.
+Nothing secret is committed. MQTT credentials come from the add-on options or the
+Supervisor MQTT service at runtime, never from a file in this repo.

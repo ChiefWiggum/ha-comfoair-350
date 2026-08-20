@@ -6,10 +6,6 @@ description: >-
   adorobis/hacomfoairmqtt). Publishes temperatures, fan levels, bypass,
   filter status and a climate entity via Home Assistant MQTT discovery.
 url: https://github.com/ChiefWiggum/ha-comfoair-350
-# Pre-built multi-arch image from GHCR (built by .github/workflows/build.yaml).
-# Delete this line to make Home Assistant build the image locally instead
-# (needed when you copy this folder into the /addons share).
-image: ghcr.io/chiefwiggum/ca350-bridge-{arch}
 arch:
   - aarch64
   - amd64

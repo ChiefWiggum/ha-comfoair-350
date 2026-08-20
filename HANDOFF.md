@@ -21,38 +21,36 @@ Run the adorobis/hacomfoairmqtt bridge (ca350.py) reliably on Home Assistant OS
 - MQTT autodiscovery: entities appear as `ca350_*` (climate.ca350_climate,
   sensor.ca350_outsidetemp, …).
 
-## Current state: add-on repository, image on GHCR (DONE, not yet pushed)
+## Current state: add-on repository, built on HAOS (pushed)
 The `/config` venv + `shell_command` method is retired — it rotted on every HAOS
 update (`_PyType_AllocNoTrack`, TROUBLESHOOTING #7). The bridge now lives in
-`ca350_bridge/`, an HA add-on modelled on the `ha-optolink-splitter` repo
-(`repository.yaml` + one folder per add-on, options → generated config, Supervisor
-MQTT auto-detect, `uart: true`, en/de translations), plus one addition that repo
-does not have: `.github/workflows/build.yaml` builds aarch64/amd64 with
-`home-assistant/builder` and pushes to **GHCR**, and `config.yaml` carries
-`image: ghcr.io/chiefwiggum/ca350-bridge-{arch}` so HAOS pulls instead of building
-on the Pi.
+`ca350_bridge/`, an HA add-on modelled on the `ha-optolink-splitter` repo:
+`repository.yaml` + one folder per add-on, options -> generated `config.ini`,
+Supervisor MQTT auto-detect, `uart: true`, en/de translations, and the image
+built on the HAOS machine from the add-on's Dockerfile (no registry, no CI).
+Pushed to https://github.com/ChiefWiggum/ha-comfoair-350 (public).
+
+Architectures: aarch64 + amd64. No armv7 — Home Assistant dropped it in 2025.12.
 
 The earlier hand-rolled `addon/` scaffold is gone. (It would have crashed anyway:
 its generated `config.ini` lacked the `[DEVICE]` and `[HA]` sections `ca350.py`
 requires, and it mapped one hardcoded device path.)
 
 ## NEXT STEPS (in order)
-1. Push to `https://github.com/ChiefWiggum/ha-comfoair-350` — see
-   `docs/PUBLISHING.md`.
-2. The repo must be **public**: HA's Supervisor clones an add-on repository
-   anonymously, so a private one cannot be added in the App Store at all.
-3. After the first Actions run: **set both GHCR packages to public** (a
-   package inherits the repo's visibility at first publish), else the Supervisor
-   pull fails with `unauthorized`.
-4. Add the repo URL in HA (App Store → ⋮ → Repositories), install, set
-   `serial_port` to the by-id `…if02` path, start.
-5. **Decommission the old method** before/while starting the add-on: delete the
+1. Add the repo in HA: App Store -> ⋮ -> Repositories ->
+   `https://github.com/ChiefWiggum/ha-comfoair-350`, then install (builds on the
+   Pi, a few minutes).
+2. Set `serial_port` to the by-id `…if02` path; leave MQTT options empty
+   (Mosquitto is auto-detected); `rs485_protocol` off, `enable_pc_mode` on.
+3. **Decommission the old method** before/while starting the add-on: delete the
    "Start ca350 bridge on HA start" automation and remove the
    `shell_command: start_ca350` block from `configuration.yaml`, then `pkill -f
    ca350`. Otherwise two instances fight over the port and the hardcoded MQTT
    client id `CA350`.
-6. Verify: MQTT integration → CA350 device, values refresh; then reboot once and
+4. Verify: MQTT integration -> CA350 device, values refresh; then reboot once and
    confirm it comes back by itself.
+5. Untested so far: the image has never been built (no Docker here, no CI). First
+   install is the first real build — watch the add-on's build log.
 
 ## Secrets
 Nothing secret is committed. MQTT credentials come from add-on options or the

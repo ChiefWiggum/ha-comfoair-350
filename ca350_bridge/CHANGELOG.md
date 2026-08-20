@@ -10,8 +10,7 @@ Initial release.
 - Own Python 3 + pyserial + paho-mqtt 2.x inside the image — the durable fix for
   the recurring `_PyType_AllocNoTrack` venv rot of the `/config` venv method
   (see `docs/TROUBLESHOOTING.md` #7).
-- Multi-arch image (aarch64, amd64) built by GitHub Actions and published
-  to GHCR, so installing pulls an image instead of building one on the Pi.
+- Builds for aarch64 and amd64 (Home Assistant dropped armv7 in 2025.12).
 - All four upstream config sections are exposed as options: serial port /
   protocol / PC mode, per-level supply and exhaust fan percentages, MQTT, and the
   discovery device identity (`device_id`, `device_name`, `device_model`).
