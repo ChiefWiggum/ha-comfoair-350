@@ -1,0 +1,23 @@
+# Add this top-level block to /config/configuration.yaml
+#
+# Why setsid + </dev/null + redirects + &:
+#   HA's shell_command waits for the command to finish and kills it after 60s.
+#   The bridge runs forever, so a plain `... &` still timed out (shell_command
+#   keeps the pipe open). setsid detaches into a new session, </dev/null and the
+#   output redirect release stdio, and & backgrounds it — so the call returns
+#   instantly while the bridge keeps running detached.
+#
+# Option A (recommended): run the supervisor (auto-restart on crash)
+shell_command:
+  start_ca350: >-
+    setsid /config/custom_components/ca350/python3venv/bin/python3
+    /config/custom_components/ca350/ca350runner.py
+    </dev/null >/config/ca350.log 2>&1 &
+
+# Option B (no auto-restart): run the bridge directly — swap ca350runner.py for ca350.py:
+#
+# shell_command:
+#   start_ca350: >-
+#     setsid /config/custom_components/ca350/python3venv/bin/python3
+#     /config/custom_components/ca350/ca350.py
+#     </dev/null >/config/ca350.log 2>&1 &

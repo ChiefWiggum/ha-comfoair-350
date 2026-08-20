@@ -1,0 +1,11 @@
+# Append to /config/automations.yaml (or create via the Automations UI).
+# Starts the bridge ~2 minutes after Home Assistant finishes booting.
+- alias: Start ca350 bridge on HA start
+  triggers:
+    - event: start
+      trigger: homeassistant
+  conditions: []
+  actions:
+    - delay: "00:02:00"
+    - action: shell_command.start_ca350
+  mode: single
