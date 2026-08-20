@@ -1,0 +1,17 @@
+# never commit the real, secret-bearing config
+config.ini
+config/config.ini
+
+# runtime + local artifacts
+*.log
+ca350.log
+*.bak
+__pycache__/
+*.pyc
+
+# python venv (recreate with: python3 -m venv python3venv)
+python3venv/
+venv/
+
+# upstream script is fetched, not vendored
+ca350.py
