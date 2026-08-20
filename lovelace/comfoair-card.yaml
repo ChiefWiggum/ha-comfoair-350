@@ -1,0 +1,39 @@
+# Dashboard card options. Confirm exact entity IDs in Developer Tools -> States
+# (filter: ca350) before using — the custom cards bind to hard-coded names.
+
+# --- Recommended: mweimerskirch custom card ---------------------------------
+# Install: https://github.com/mweimerskirch/lovelace-hacomfoairmqtt
+# Register resource /local/lovelace-hacomfoairmqtt/hacomfoairmqtt-card.js (JS Module),
+# then add a Manual card:
+#
+# type: 'custom:hacomfoairmqtt-card'
+# climateEntity: climate.ca350_climate
+# outsideTempSensor: sensor.ca350_outsidetemp
+# exhaustTempSensor: sensor.ca350_exhausttemp
+# returnTempSensor: sensor.ca350_returntemp
+# supplyTempSensor: sensor.ca350_supplytemp
+# filterStatusSensor: binary_sensor.ca350_filterstatus
+# bypassValveSensor: binary_sensor.ca350_bypass_valve
+# summerModeSensor: binary_sensor.ca350_summer_mode
+# returnAirLevelSensor: sensor.ca350_return_air_level
+# supplyAirLevelSensor: sensor.ca350_supply_air_level
+# preheatingStatusSensor: binary_sensor.ca350_preheatingstatus
+
+# --- Fallback: plain built-in cards (no custom install) ---------------------
+type: vertical-stack
+cards:
+  - type: thermostat
+    entity: climate.ca350_climate
+  - type: entities
+    title: ComfoAir 350 Luxe
+    entities:
+      - entity: sensor.ca350_outsidetemp
+        name: Outside
+      - entity: sensor.ca350_supplytemp
+        name: Supply (in)
+      - entity: sensor.ca350_returntemp
+        name: Return
+      - entity: sensor.ca350_exhausttemp
+        name: Exhaust (out)
+      - entity: binary_sensor.ca350_filterstatus
+        name: Filter
