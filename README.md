@@ -1,58 +1,98 @@
-# ComfoAir 350 CH L Luxe → Home Assistant (HAOS on Raspberry Pi 5)
+# Home Assistant app (add-on): ComfoAir 350 Bridge
 
-Documentation and configuration for integrating a **Zehnder ComfoAir 350 CH L Luxe**
-ventilation unit into **Home Assistant OS** running on a **Raspberry Pi 5**, using the
-[adorobis/hacomfoairmqtt](https://github.com/adorobis/hacomfoairmqtt) serial↔MQTT bridge
-and a **DFRobot RainbowLink** USB→serial converter (RS232 channel).
+A Home Assistant OS app wrapping
+[adorobis/hacomfoairmqtt](https://github.com/adorobis/hacomfoairmqtt): a serial
+<-> MQTT bridge for **Zehnder ComfoAir 350 / 500** ventilation units, with Home
+Assistant MQTT discovery.
 
-This repo is a personal record of a *working* setup: the exact port, wiring, serial
-device, config values, and — importantly — the problems hit along the way and their fixes.
+The image is built for aarch64 / amd64 / armv7 by GitHub Actions and published to
+GHCR, so installing pulls an image instead of building one on your Pi.
+
+> Since Home Assistant 2026.2, add-ons are called **apps** in the UI
+> (Settings -> Apps). Nothing changed technically — this repository works the
+> same way as before, and the developer docs still say "add-on".
+
+Target setup of this repo: a **ComfoAir 350 CH L Luxe** wired to a Raspberry Pi 5
+running HAOS via the DB9 "RS232 - P.C." port and a USB serial adapter. It is a
+personal record of a *working* setup: the exact port, wiring, serial device,
+config values, and the problems hit along the way with their fixes.
+
+## Install in Home Assistant
+
+1. Install the **Mosquitto broker** app and set up the **MQTT integration**.
+2. Settings -> Apps -> **App Store** -> (three-dot menu) -> **Repositories**
+   -> add `https://github.com/ChiefWiggum/ha-comfoair-bridge`.
+3. Install **ComfoAir 350 Bridge**.
+4. In the app's Configuration tab set `serial_port` to your adapter — prefer a
+   `/dev/serial/by-id/...` path (Settings -> System -> Hardware). Leave the MQTT
+   options empty; Mosquitto is auto-detected.
+5. Start the app, enable **Start on boot** and **Watchdog**, and watch the log. A
+   **CA350** device appears under the MQTT integration with
+   `climate.ca350_climate`, `sensor.ca350_outsidetemp` and friends.
+
+Full documentation: [`ca350_bridge/DOCS.md`](ca350_bridge/DOCS.md) (also shown in
+the app's Documentation tab). Publishing / release flow:
+[`docs/PUBLISHING.md`](docs/PUBLISHING.md).
+
+> Coming from the old `/config` venv + `shell_command` method? Remove the
+> autostart automation and the `shell_command: start_ca350` block **before**
+> starting the app, or the two fight over the serial port and the MQTT client id.
+> See DOCS.md -> "Migrating from the /config venv method".
 
 ## The setup at a glance
 
 | Item | Value |
 |---|---|
 | Unit | Zehnder ComfoAir 350 CH L **Luxe** |
-| Control port used | DB9 socket labelled **"RS232 – P.C."** (connector X / X31) |
+| Control port used | DB9 socket labelled **"RS232 - P.C."** (connector X / X31) |
 | Adapter | DFRobot RainbowLink, **RS232 channel** |
-| Protocol | True RS232 (±12 V), 9600 baud — `RS485_protocol=False` |
+| Protocol | True RS232 (+-12 V), 9600 baud - `rs485_protocol: false` |
 | USB device | WCH "USB Quad Serial" (CDC-ACM), native in HAOS |
 | Serial path | `/dev/serial/by-id/usb-wch.cn_USB_Quad_Serial_0123456789-if02` (= ttyACM1) |
-| Bridge | adorobis/hacomfoairmqtt (`ca350.py`) in a venv under `/config` |
+| Bridge | adorobis/hacomfoairmqtt (`ca350.py`) in the add-on container |
 | HA link | MQTT (Mosquitto add-on) + MQTT autodiscovery |
-| Wall panel | CC-Luxe left connected; `enablePcMode=True` hands the bus to the PC port |
+| Wall panel | CC-Luxe left connected; `enable_pc_mode: true` hands the bus to the PC port |
 
 ## Repo layout
 
 ```
-comfoair350-haos/
-├── README.md                         this file
-├── docs/
-│   ├── SETUP.md                      full board-specific setup runbook
-│   ├── WIRING.md                     DB9 "RS232 – P.C." wiring + serial-device ID
-│   └── TROUBLESHOOTING.md            every issue hit, in order, with the fix
-├── config/
-│   ├── config.ini.example           hacomfoairmqtt config (placeholders, no secrets)
-│   ├── ca350runner.py               supervisor loop (fixed: absolute venv python)
-│   ├── configuration.yaml.snippet   HA shell_command (setsid, returns immediately)
-│   └── automations.yaml.snippet     HA-start automation
-├── lovelace/
-│   └── comfoair-card.yaml           dashboard card examples
-└── tools/
-    └── serial_sniffer.py            passive multi-port listener to find the RS232 channel
+repository.yaml                     add-on repository manifest
+LICENSE                             MIT (same as upstream hacomfoairmqtt)
+ca350_bridge/                       the add-on
+  config.yaml                       options, schema, uart, mqtt, GHCR image
+  build.yaml                        base images per architecture
+  Dockerfile                        own Python + pinned upstream ca350.py
+  run.sh                            options -> config.ini, MQTT auto-detect, launch
+  DOCS.md                           user documentation (Documentation tab)
+  CHANGELOG.md
+  translations/                     option labels for the HA UI (en, de)
+.github/workflows/build.yaml        lint + multi-arch build + push to GHCR
+docs/
+  PUBLISHING.md                     repo/GHCR setup and release flow
+  SETUP.md                          full board-specific setup runbook
+  WIRING.md                         DB9 "RS232 - P.C." wiring + serial-device ID
+  TROUBLESHOOTING.md                every issue hit, in order, with the fix
+lovelace/
+  comfoair-card.yaml                dashboard card examples
+tools/
+  serial_sniffer.py                 passive multi-port listener to find the RS232 channel
+config/                             HISTORY: the old /config venv method (see below)
 ```
 
-## Important: ca350.py is NOT included
+## `ca350.py` is not vendored here
 
-The bridge script `ca350.py` belongs to the upstream project and is not vendored here.
-Pull it fresh into `/config/custom_components/ca350/`:
+The bridge script belongs to the upstream project. The add-on's Dockerfile fetches
+it at build time from a **pinned commit**, so builds are reproducible; see
+`CA350_COMMIT` in [`ca350_bridge/Dockerfile`](ca350_bridge/Dockerfile).
 
-```bash
-curl -L -o /config/custom_components/ca350/ca350.py \
-  https://raw.githubusercontent.com/adorobis/hacomfoairmqtt/master/src/ca350.py
-```
+## The `config/` folder is history, not the recommended path
 
-See `docs/SETUP.md` for the full installation, including the Python venv.
+`config/` holds the earlier approach: `ca350.py` in a Python venv under `/config`,
+started by a HA `shell_command` and an automation. It worked, but the venv borrows
+the SSH add-on's Python interpreter and rots on every HAOS update
+(`ImportError: ... _PyType_AllocNoTrack: symbol not found` — see
+[`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md) #7). The add-on carries its
+own Python and cannot rot. Kept for reference only.
 
 ## Credit
 
@@ -60,9 +100,5 @@ See `docs/SETUP.md` for the full installation, including the Python venv.
 - Original Domoticz work: https://github.com/AlbertHakvoort/StorkAir-Zehnder-WHR-930-Domoticz-MQTT
 - Lovelace cards: https://github.com/mweimerskirch/lovelace-hacomfoairmqtt · https://github.com/TimWeyand/lovelace-comfoair
 
-## Recommended: run as a local add-on
-
-The `shell_command` + `/config` venv method proved fragile on HAOS (the venv rots on
-reboot — see docs/TROUBLESHOOTING.md #7). The **durable** setup is the local add-on in
-`addon/`, which runs the bridge as a container HA manages. Prefer that; the `config/` venv
-files are kept for reference/history.
+Licensed under the [MIT license](LICENSE), same as the upstream project.
+Unaffiliated with Zehnder.

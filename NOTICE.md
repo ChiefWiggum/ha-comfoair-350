@@ -8,5 +8,6 @@ upstream bridge script `ca350.py`, which is fetched from its own project.
 - Based on Domoticz work: https://github.com/AlbertHakvoort/StorkAir-Zehnder-WHR-930-Domoticz-MQTT
 - Lovelace cards: mweimerskirch/lovelace-hacomfoairmqtt, TimWeyand/lovelace-comfoair, wichers/lovelace-comfoair
 
-The files authored here (docs/, config snippets, ca350runner.py, serial_sniffer.py) may be
-reused freely for your own setup.
+The files authored here (the `ca350_bridge/` add-on wrapper, docs/, config snippets,
+ca350runner.py, serial_sniffer.py) are MIT licensed - see LICENSE - and may be reused
+freely for your own setup. Upstream `ca350.py` is MIT too, (c) 2020 Adam Dorobis.

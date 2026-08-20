@@ -1,0 +1,70 @@
+name: ComfoAir 350 Bridge
+version: "1.0.0"
+slug: ca350_bridge
+description: >-
+  Zehnder ComfoAir 350 / 500 serial <-> MQTT bridge (wraps
+  adorobis/hacomfoairmqtt). Publishes temperatures, fan levels, bypass,
+  filter status and a climate entity via Home Assistant MQTT discovery.
+url: https://github.com/ChiefWiggum/ha-comfoair-bridge
+# Pre-built multi-arch image from GHCR (built by .github/workflows/build.yaml).
+# Delete this line to make Home Assistant build the image locally instead
+# (needed when you copy this folder into the /addons share).
+image: ghcr.io/chiefwiggum/ca350-bridge-{arch}
+arch:
+  - aarch64
+  - amd64
+  - armv7
+init: false
+startup: services
+boot: auto
+uart: true
+map:
+  - addon_config:rw
+services:
+  - mqtt:want
+options:
+  serial_port: /dev/ttyUSB0
+  rs485_protocol: false
+  enable_pc_mode: true
+  refresh_interval: 10
+  mqtt_broker: ""
+  mqtt_user: ""
+  mqtt_password: ""
+  device_id: ca350
+  device_name: CA350
+  device_model: ComfoAir 350
+  ha_discovery_sensors: true
+  ha_discovery_climate: true
+  setup_fan_levels_at_start: true
+  fan_in_absent: 15
+  fan_in_low: 25
+  fan_in_mid: 40
+  fan_in_high: 70
+  fan_out_absent: 15
+  fan_out_low: 25
+  fan_out_mid: 40
+  fan_out_high: 70
+  debug: false
+schema:
+  serial_port: str
+  rs485_protocol: bool
+  enable_pc_mode: bool
+  refresh_interval: int(1,3600)
+  mqtt_broker: str
+  mqtt_user: str
+  mqtt_password: password
+  device_id: str
+  device_name: str
+  device_model: str
+  ha_discovery_sensors: bool
+  ha_discovery_climate: bool
+  setup_fan_levels_at_start: bool
+  fan_in_absent: int(0,100)
+  fan_in_low: int(0,100)
+  fan_in_mid: int(0,100)
+  fan_in_high: int(0,100)
+  fan_out_absent: int(0,100)
+  fan_out_low: int(0,100)
+  fan_out_mid: int(0,100)
+  fan_out_high: int(0,100)
+  debug: bool

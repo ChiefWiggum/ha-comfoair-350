@@ -1,0 +1,80 @@
+configuration:
+  serial_port:
+    name: Serial port
+    description: >-
+      Serial device of the ComfoAir connection. Prefer a stable
+      /dev/serial/by-id/... path over /dev/ttyUSB0 or /dev/ttyACM1
+      (Settings -> System -> Hardware shows the available devices).
+  rs485_protocol:
+    name: RS485 protocol
+    description: >-
+      Off for the DB9 "RS232 - P.C." port of a ComfoAir 350 (true RS232).
+      Only enable it for an RS485 connection.
+  enable_pc_mode:
+    name: Enable PC mode
+    description: >-
+      Hands bus control to the PC port so a CC-Ease / CC-Luxe wall panel can
+      stay connected.
+  refresh_interval:
+    name: Poll interval (seconds)
+    description: How often values are read from the unit.
+  mqtt_broker:
+    name: MQTT broker
+    description: >-
+      Optional, as host or host:port. Leave empty to use the Mosquitto broker
+      add-on detected via the Supervisor.
+  mqtt_user:
+    name: MQTT user
+    description: Optional. Leave empty to use the auto-detected Mosquitto credentials.
+  mqtt_password:
+    name: MQTT password
+    description: Optional. Leave empty to use the auto-detected Mosquitto credentials.
+  device_id:
+    name: Device ID
+    description: >-
+      Prefix of the discovered entities (ca350 -> sensor.ca350_outsidetemp).
+      Change it only when running several units.
+  device_name:
+    name: Device name
+    description: Name of the device shown in Home Assistant.
+  device_model:
+    name: Device model
+    description: Model shown in the device info, e.g. ComfoAir 350 or ComfoAir 500.
+  ha_discovery_sensors:
+    name: Publish sensor discovery
+    description: Create the temperature, fan, bypass and filter entities via MQTT discovery.
+  ha_discovery_climate:
+    name: Publish climate discovery
+    description: Create the climate entity (comfort temperature and fan level) via MQTT discovery.
+  setup_fan_levels_at_start:
+    name: Write fan levels at start
+    description: >-
+      Write the fan percentages below into the unit when the add-on starts.
+      Turn this off to keep the levels configured on the unit itself.
+  fan_in_absent:
+    name: Supply fan - absent (%)
+    description: Supply fan percentage for level "absent" (fan speed 0).
+  fan_in_low:
+    name: Supply fan - low (%)
+    description: Supply fan percentage for level 1.
+  fan_in_mid:
+    name: Supply fan - medium (%)
+    description: Supply fan percentage for level 2.
+  fan_in_high:
+    name: Supply fan - high (%)
+    description: Supply fan percentage for level 3.
+  fan_out_absent:
+    name: Exhaust fan - absent (%)
+    description: Exhaust fan percentage for level "absent" (fan speed 0).
+  fan_out_low:
+    name: Exhaust fan - low (%)
+    description: Exhaust fan percentage for level 1.
+  fan_out_mid:
+    name: Exhaust fan - medium (%)
+    description: Exhaust fan percentage for level 2.
+  fan_out_high:
+    name: Exhaust fan - high (%)
+    description: Exhaust fan percentage for level 3.
+  debug:
+    name: Debug logging
+    description: Log every serial frame and MQTT message. Very verbose.

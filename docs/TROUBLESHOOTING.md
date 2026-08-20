@@ -111,8 +111,10 @@ the add-on (updates/reboots), those musl binaries change and the `/config` venv 
 mismatched interpreter. This is architectural, not a one-off — the venv-on-borrowed-Python
 approach is not stable on HAOS.
 
-**Durable fix:** stop using a `/config` venv + `shell_command`. Run the bridge as a **local
-add-on** (a container HA manages, carrying its own Python + pyserial). See `addon/`. It maps
-the `by-id` serial device in, restarts on boot, and cannot rot because it doesn't borrow
-HAOS's interpreter. After installing the add-on, remove the old automation and the
-`shell_command` block so they don't fight over the port / MQTT client id.
+**Durable fix:** stop using a `/config` venv + `shell_command`. Run the bridge as an
+**add-on** (a container HA manages, carrying its own Python + pyserial + paho-mqtt). See
+`ca350_bridge/` in this repo, installable as an add-on repository - it maps the serial
+device via `uart: true`, restarts on boot, and cannot rot because it doesn't borrow HAOS's
+interpreter. After installing the add-on, remove the old automation and the `shell_command`
+block so they don't fight over the port / MQTT client id (see
+`ca350_bridge/DOCS.md` -> "Migrating from the /config venv method").

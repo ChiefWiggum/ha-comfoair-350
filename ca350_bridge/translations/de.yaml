@@ -1,0 +1,80 @@
+configuration:
+  serial_port:
+    name: Serieller Port
+    description: >-
+      Serielles Gerät der ComfoAir-Verbindung. Bevorzugt einen stabilen
+      /dev/serial/by-id/...-Pfad statt /dev/ttyUSB0 oder /dev/ttyACM1
+      (Einstellungen -> System -> Hardware zeigt die verfügbaren Geräte).
+  rs485_protocol:
+    name: RS485-Protokoll
+    description: >-
+      Aus für den DB9-Anschluss "RS232 - P.C." einer ComfoAir 350 (echtes
+      RS232). Nur für eine RS485-Verbindung einschalten.
+  enable_pc_mode:
+    name: PC-Modus aktivieren
+    description: >-
+      Übergibt die Buskontrolle an den PC-Port, damit ein CC-Ease-/CC-Luxe-
+      Bedienteil angeschlossen bleiben kann.
+  refresh_interval:
+    name: Abfrageintervall (Sekunden)
+    description: Wie oft Werte vom Gerät gelesen werden.
+  mqtt_broker:
+    name: MQTT-Broker
+    description: >-
+      Optional, als Host oder Host:Port. Leer lassen, um das über den
+      Supervisor erkannte Mosquitto-Add-on zu verwenden.
+  mqtt_user:
+    name: MQTT-Benutzer
+    description: Optional. Leer lassen für die automatisch erkannten Mosquitto-Zugangsdaten.
+  mqtt_password:
+    name: MQTT-Passwort
+    description: Optional. Leer lassen für die automatisch erkannten Mosquitto-Zugangsdaten.
+  device_id:
+    name: Geräte-ID
+    description: >-
+      Präfix der erkannten Entitäten (ca350 -> sensor.ca350_outsidetemp).
+      Nur ändern, wenn mehrere Geräte betrieben werden.
+  device_name:
+    name: Gerätename
+    description: Name des Geräts in Home Assistant.
+  device_model:
+    name: Gerätemodell
+    description: Modell in den Geräteinformationen, z. B. ComfoAir 350 oder ComfoAir 500.
+  ha_discovery_sensors:
+    name: Sensor-Discovery veröffentlichen
+    description: Erzeugt die Temperatur-, Lüfter-, Bypass- und Filter-Entitäten per MQTT-Discovery.
+  ha_discovery_climate:
+    name: Climate-Discovery veröffentlichen
+    description: Erzeugt die Climate-Entität (Komforttemperatur und Lüfterstufe) per MQTT-Discovery.
+  setup_fan_levels_at_start:
+    name: Lüfterstufen beim Start schreiben
+    description: >-
+      Schreibt die unten eingestellten Lüfterprozente beim Start in das Gerät.
+      Ausschalten, um die im Gerät konfigurierten Stufen zu behalten.
+  fan_in_absent:
+    name: Zuluftventilator - Abwesend (%)
+    description: Zuluft-Prozentwert für Stufe "Abwesend" (Lüfterstufe 0).
+  fan_in_low:
+    name: Zuluftventilator - Niedrig (%)
+    description: Zuluft-Prozentwert für Stufe 1.
+  fan_in_mid:
+    name: Zuluftventilator - Mittel (%)
+    description: Zuluft-Prozentwert für Stufe 2.
+  fan_in_high:
+    name: Zuluftventilator - Hoch (%)
+    description: Zuluft-Prozentwert für Stufe 3.
+  fan_out_absent:
+    name: Abluftventilator - Abwesend (%)
+    description: Abluft-Prozentwert für Stufe "Abwesend" (Lüfterstufe 0).
+  fan_out_low:
+    name: Abluftventilator - Niedrig (%)
+    description: Abluft-Prozentwert für Stufe 1.
+  fan_out_mid:
+    name: Abluftventilator - Mittel (%)
+    description: Abluft-Prozentwert für Stufe 2.
+  fan_out_high:
+    name: Abluftventilator - Hoch (%)
+    description: Abluft-Prozentwert für Stufe 3.
+  debug:
+    name: Debug-Protokollierung
+    description: Protokolliert jeden seriellen Frame und jede MQTT-Nachricht. Sehr ausführlich.
