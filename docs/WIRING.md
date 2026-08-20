@@ -9,8 +9,10 @@ PC serial port and is the correct, safe choice:
 - It only uses pins **2, 3, 5** — there is **no 12 V pin** to worry about (unlike the RJ45
   RS232 port, whose pin 1 carries ~12 V and can destroy an adapter/unit if mis-wired).
 - It is separate from **X6 "RS232 – KFB"** (the line to the CC-Luxe wall panel) and from
-  **X5** (RJ45). Because the PC port is independent, the wall panel can stay connected;
-  `enablePcMode=True` in the bridge hands bus control to the PC port.
+  **X5** (RJ45). Because the PC port is independent, the wall panel can stay connected and
+  this setup read every value with PC mode **off**. The bridge's `enablePcMode` /
+  `enable_pc_mode` option hands bus control to the PC port instead of the panel — needed
+  only if writes from Home Assistant don't take effect (see `ENVIRONMENT.md`).
 
 Leave these alone: **X5** (RJ45), **X6** (RS232-KFB), **X7** (sensor / 0-10 V / 12 V strip).
 

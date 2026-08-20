@@ -1,7 +1,8 @@
 # Handoff brief — ComfoAir 350 → HAOS bridge
 
 Where the project stands. Read `README.md`, `ca350_bridge/DOCS.md`,
-`docs/PUBLISHING.md`, `docs/WIRING.md` and `docs/TROUBLESHOOTING.md` for detail.
+`docs/ENVIRONMENT.md` (verified snapshot of the live machine), `docs/PUBLISHING.md`,
+`docs/WIRING.md` and `docs/TROUBLESHOOTING.md` for detail.
 
 ## Goal
 Run the adorobis/hacomfoairmqtt bridge (ca350.py) reliably on Home Assistant OS
@@ -42,7 +43,8 @@ requires, and it mapped one hardcoded device path.)
    `https://github.com/ChiefWiggum/ha-comfoair-350`, then install (builds on the
    Pi, a few minutes).
 2. Set `serial_port` to the by-id `…if02` path; leave MQTT options empty
-   (Mosquitto is auto-detected); `rs485_protocol` off, `enable_pc_mode` on.
+   (Mosquitto is auto-detected); `rs485_protocol` off, `enable_pc_mode` off
+   (turn it on only if HA cannot change fan level / temperature).
 3. **Decommission the old method** before/while starting the add-on: delete the
    "Start ca350 bridge on HA start" automation and remove the
    `shell_command: start_ca350` block from `configuration.yaml`, then `pkill -f

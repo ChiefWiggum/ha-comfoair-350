@@ -13,8 +13,9 @@ configuration:
   enable_pc_mode:
     name: Enable PC mode
     description: >-
-      Hands bus control to the PC port so a CC-Ease / CC-Luxe wall panel can
-      stay connected.
+      Takes bus control from the CC-Ease / CC-Luxe wall panel and gives it to the
+      PC port. Off is enough to read every value; enable it only if Home
+      Assistant cannot change fan level or temperature.
   refresh_interval:
     name: Poll interval (seconds)
     description: How often values are read from the unit.

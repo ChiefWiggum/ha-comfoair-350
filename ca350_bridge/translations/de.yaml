@@ -13,8 +13,9 @@ configuration:
   enable_pc_mode:
     name: PC-Modus aktivieren
     description: >-
-      Übergibt die Buskontrolle an den PC-Port, damit ein CC-Ease-/CC-Luxe-
-      Bedienteil angeschlossen bleiben kann.
+      Nimmt dem CC-Ease-/CC-Luxe-Bedienteil die Buskontrolle und gibt sie an den
+      PC-Port. Zum Lesen aller Werte nicht nötig; nur einschalten, wenn Home
+      Assistant Lüfterstufe oder Temperatur nicht ändern kann.
   refresh_interval:
     name: Abfrageintervall (Sekunden)
     description: Wie oft Werte vom Gerät gelesen werden.
