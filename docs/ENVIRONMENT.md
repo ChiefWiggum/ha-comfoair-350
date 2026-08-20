@@ -57,6 +57,15 @@ defaults to off too. Turn it on only if Home Assistant cannot *change* fan level
 or temperature while the panel is attached — it disables the panel's control of
 the bus.
 
+**Re-verified on the add-on, 2026-08-20 13:30.** With `enable_pc_mode: false`
+the dashboard card filled in completely: fan 868/860 rpm and 25 % / 25 %,
+ventilation level 1, all four temperatures, comfort setpoint 20 °C, filter OK,
+bypass closed, preheating off, summer mode on. The unit also accepted writes in
+that state (`Changed RS232 mode to 0`, `Changed the fan levels`), and the 25 %
+at level 1 is `fan_in_low` / `fan_out_low` — proof that
+`setup_fan_levels_at_start` wrote 15/25/40/70 into the unit. So PC mode is not
+needed on this installation, for reads or writes.
+
 ## Home Assistant side (retired)
 
 `configuration.yaml` held exactly the `shell_command` from

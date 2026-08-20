@@ -91,9 +91,11 @@ instances kick each other off the broker in an endless reconnect loop:
   actually holds.
 - **MQTT reconnect loop**: a second instance of the bridge is running — see the
   migration steps above.
-- **`could not get serial data` / `Expected return not found`** now and then is
-  normal on ComfoAir units; the bridge retries. Judge success by whether values
-  refresh in Home Assistant, not by a clean log.
+- **`could not get serial data` / `Expected return not found`** is normal on
+  ComfoAir units; the bridge retries and the next poll usually lands. A healthy
+  install logs these steadily — verified against a fully populated dashboard, so
+  judge success by whether values refresh in Home Assistant, not by a clean log.
+  In particular they are not a reason to turn on `enable_pc_mode`.
 - **`homeassistant/sensor/ca350_[nametemp]/config`** in the log is cosmetic: the
   bridge prints the topic template before substitution. Check Developer Tools ->
   States for `sensor.ca350_outsidetemp` to confirm the real entities exist.

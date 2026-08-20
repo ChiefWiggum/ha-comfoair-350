@@ -95,6 +95,12 @@ Also confirm `HAEnableAutoDiscoverySensors=True` in `config.ini`.
 - Judge success by whether **values refresh in HA**, not by a clean log.
 - Occasional `could not get serial data` / `Expected return not found` is **normal** on
   ComfoAir units — the serial implementation is flaky and the bridge retries.
+  Measured on the add-on's first run (2026-08-20): the log carried these warnings for
+  `get_fan_status`, `get_ventilation_status`, `get_bypass_status`, `get_filter_weeks`,
+  `get_filter_hours`, `get_preheating_status`, `get_ewt` and `get_analog_sensor` — and
+  every one of those entities was still populated in the dashboard, because the next poll
+  succeeded. A whole class of reads warning repeatedly does **not** mean the datapoint is
+  missing, and it is **not** a reason to enable PC mode.
 - Always use the **`by-id` serial path**, never the bare `ttyACMx`.
 - Keep the venv under **`/config`** (persists across reboots); never rely on packages
   installed into the add-on's system python (wiped on restart).
