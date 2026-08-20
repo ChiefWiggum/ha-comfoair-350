@@ -37,19 +37,21 @@ its generated `config.ini` lacked the `[DEVICE]` and `[HA]` sections `ca350.py`
 requires, and it mapped one hardcoded device path.)
 
 ## NEXT STEPS (in order)
-1. Create the GitHub repo and push — `docs/PUBLISHING.md` has the exact commands.
-   Assumed name: `ChiefWiggum/ha-comfoair-bridge` (change it in `repository.yaml`,
-   `ca350_bridge/config.yaml`, `ca350_bridge/build.yaml` if you pick another).
-2. After the first Actions run: **set the three GHCR packages to public**, else
-   the Supervisor pull fails with `unauthorized`.
-3. Add the repo URL in HA (App Store → ⋮ → Repositories), install, set
+1. Push to `https://github.com/ChiefWiggum/ha-comfoair-350` — see
+   `docs/PUBLISHING.md`.
+2. The repo must be **public**: HA's Supervisor clones an add-on repository
+   anonymously, so a private one cannot be added in the App Store at all.
+3. After the first Actions run: **set the three GHCR packages to public** (a
+   package inherits the repo's visibility at first publish), else the Supervisor
+   pull fails with `unauthorized`.
+4. Add the repo URL in HA (App Store → ⋮ → Repositories), install, set
    `serial_port` to the by-id `…if02` path, start.
-4. **Decommission the old method** before/while starting the add-on: delete the
+5. **Decommission the old method** before/while starting the add-on: delete the
    "Start ca350 bridge on HA start" automation and remove the
    `shell_command: start_ca350` block from `configuration.yaml`, then `pkill -f
    ca350`. Otherwise two instances fight over the port and the hardcoded MQTT
    client id `CA350`.
-5. Verify: MQTT integration → CA350 device, values refresh; then reboot once and
+6. Verify: MQTT integration → CA350 device, values refresh; then reboot once and
    confirm it comes back by itself.
 
 ## Secrets

@@ -21,7 +21,7 @@ config values, and the problems hit along the way with their fixes.
 
 1. Install the **Mosquitto broker** app and set up the **MQTT integration**.
 2. Settings -> Apps -> **App Store** -> (three-dot menu) -> **Repositories**
-   -> add `https://github.com/ChiefWiggum/ha-comfoair-bridge`.
+   -> add `https://github.com/ChiefWiggum/ha-comfoair-350`.
 3. Install **ComfoAir 350 Bridge**.
 4. In the app's Configuration tab set `serial_port` to your adapter — prefer a
    `/dev/serial/by-id/...` path (Settings -> System -> Hardware). Leave the MQTT

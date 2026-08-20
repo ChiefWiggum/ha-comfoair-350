@@ -20,7 +20,7 @@ that way, and it restarts on boot without a `shell_command` or an automation.
 ## Installation
 
 1. Settings -> Apps (Add-ons) -> **App Store** -> three-dot menu ->
-   **Repositories** -> add `https://github.com/ChiefWiggum/ha-comfoair-bridge`.
+   **Repositories** -> add `https://github.com/ChiefWiggum/ha-comfoair-350`.
 2. Install **ComfoAir 350 Bridge**. The image is pulled from GHCR, so this takes
    seconds rather than the minutes a local build needs on a Pi.
 3. Open **Configuration** and set `serial_port`. Prefer the stable by-id path —

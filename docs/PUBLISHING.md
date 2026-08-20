@@ -25,7 +25,7 @@ ca350_bridge/
 
 | Thing | Value | Where to change it |
 |---|---|---|
-| GitHub repo | `ChiefWiggum/ha-comfoair-bridge` | `repository.yaml`, `ca350_bridge/config.yaml` (`url`), `ca350_bridge/build.yaml` (label), `DOCS.md` |
+| GitHub repo | `ChiefWiggum/ha-comfoair-350` | `repository.yaml`, `ca350_bridge/config.yaml` (`url`), `ca350_bridge/build.yaml` (label), `DOCS.md` |
 | Image name | `ghcr.io/chiefwiggum/ca350-bridge-{arch}` | `ca350_bridge/config.yaml` (`image`), `.github/workflows/build.yaml` (`IMAGE_NAME`) |
 | Add-on slug | `ca350_bridge` | folder name + `slug` in `config.yaml` |
 
@@ -35,21 +35,26 @@ edits; only the `image:` line in `config.yaml` is hardcoded.
 
 ## One-time setup
 
-1. Create the GitHub repo (web UI: **New repository** ->
-   `ha-comfoair-bridge`, public, no README/license/gitignore) and push:
+1. Push to the repo (`ChiefWiggum/ha-comfoair-350`):
 
    ```bash
-   git remote add origin https://github.com/ChiefWiggum/ha-comfoair-bridge.git
+   git remote add origin https://github.com/ChiefWiggum/ha-comfoair-350.git
    git push -u origin main
    ```
+
+   The repo has to be **public**. Home Assistant's Supervisor clones an add-on
+   repository anonymously, so a private one cannot be added in the App Store —
+   it fails with a clone error, before any image is involved.
 
 2. Watch **Actions -> Build and publish add-on image**. Three jobs
    (aarch64, amd64, armv7) each push `ca350-bridge-<arch>:1.0.0` and `:latest`.
    The workflow needs no secrets — it uses the built-in `GITHUB_TOKEN` with
    `packages: write`.
 
-3. **Make the packages public.** New GHCR packages are private, and the
-   Supervisor pulls anonymously, so an install would fail with `unauthorized`.
+3. **Make the packages public.** A new GHCR package inherits the repository's
+   visibility at first publish, and the Supervisor pulls anonymously, so an
+   install would otherwise fail with `unauthorized`. Package visibility is set
+   per package and can be public even if the repo were not.
    For each of the three packages: profile -> **Packages** ->
    `ca350-bridge-aarch64` -> **Package settings** -> **Change visibility** ->
    **Public**. While there, **Connect repository** links the package to the repo
@@ -57,7 +62,7 @@ edits; only the `image:` line in `config.yaml` is hardcoded.
    automatically on most pushes).
 
 4. In Home Assistant: Settings -> Apps -> **App Store** -> three-dot menu ->
-   **Repositories** -> add `https://github.com/ChiefWiggum/ha-comfoair-bridge`.
+   **Repositories** -> add `https://github.com/ChiefWiggum/ha-comfoair-350`.
    **ComfoAir 350 Bridge** appears and installs by pulling the image.
 
 ## Releasing a new version
