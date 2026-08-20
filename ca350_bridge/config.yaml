@@ -13,10 +13,8 @@ image: ghcr.io/chiefwiggum/ca350-bridge-{arch}
 arch:
   - aarch64
   - amd64
-  - armv7
 init: false
 startup: services
-boot: auto
 uart: true
 map:
   - addon_config:rw

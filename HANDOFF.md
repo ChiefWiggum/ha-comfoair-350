@@ -27,7 +27,7 @@ update (`_PyType_AllocNoTrack`, TROUBLESHOOTING #7). The bridge now lives in
 `ca350_bridge/`, an HA add-on modelled on the `ha-optolink-splitter` repo
 (`repository.yaml` + one folder per add-on, options → generated config, Supervisor
 MQTT auto-detect, `uart: true`, en/de translations), plus one addition that repo
-does not have: `.github/workflows/build.yaml` builds aarch64/amd64/armv7 with
+does not have: `.github/workflows/build.yaml` builds aarch64/amd64 with
 `home-assistant/builder` and pushes to **GHCR**, and `config.yaml` carries
 `image: ghcr.io/chiefwiggum/ca350-bridge-{arch}` so HAOS pulls instead of building
 on the Pi.
@@ -41,7 +41,7 @@ requires, and it mapped one hardcoded device path.)
    `docs/PUBLISHING.md`.
 2. The repo must be **public**: HA's Supervisor clones an add-on repository
    anonymously, so a private one cannot be added in the App Store at all.
-3. After the first Actions run: **set the three GHCR packages to public** (a
+3. After the first Actions run: **set both GHCR packages to public** (a
    package inherits the repo's visibility at first publish), else the Supervisor
    pull fails with `unauthorized`.
 4. Add the repo URL in HA (App Store → ⋮ → Repositories), install, set

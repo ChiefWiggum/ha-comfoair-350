@@ -3,8 +3,8 @@
 This repo is now a **Home Assistant add-on repository** in the same shape as
 [`ha-optolink-splitter`](https://github.com/ChiefWiggum/ha-optolink-splitter)
 (`repository.yaml` at the root, one folder per add-on), with one addition: the
-image is **not** built on the Pi. GitHub Actions builds it for three
-architectures and pushes it to GHCR, and `config.yaml` points Home Assistant at
+image is **not** built on the Pi. GitHub Actions builds it for aarch64 and
+amd64 and pushes it to GHCR, and `config.yaml` points Home Assistant at
 that image.
 
 ```
@@ -46,8 +46,9 @@ edits; only the `image:` line in `config.yaml` is hardcoded.
    repository anonymously, so a private one cannot be added in the App Store —
    it fails with a clone error, before any image is involved.
 
-2. Watch **Actions -> Build and publish add-on image**. Three jobs
-   (aarch64, amd64, armv7) each push `ca350-bridge-<arch>:1.0.0` and `:latest`.
+2. Watch **Actions -> Build and publish add-on image**. Two jobs
+   (aarch64, amd64) each push `ca350-bridge-<arch>:1.0.0` and `:latest`.
+   armv7 is not built: Home Assistant dropped that architecture in 2025.12.
    The workflow needs no secrets — it uses the built-in `GITHUB_TOKEN` with
    `packages: write`.
 
@@ -55,7 +56,7 @@ edits; only the `image:` line in `config.yaml` is hardcoded.
    visibility at first publish, and the Supervisor pulls anonymously, so an
    install would otherwise fail with `unauthorized`. Package visibility is set
    per package and can be public even if the repo were not.
-   For each of the three packages: profile -> **Packages** ->
+   For each of the two packages: profile -> **Packages** ->
    `ca350-bridge-aarch64` -> **Package settings** -> **Change visibility** ->
    **Public**. While there, **Connect repository** links the package to the repo
    (the `org.opencontainers.image.source` label in `build.yaml` does this
@@ -78,7 +79,7 @@ the image tag *is* that version — so the two must move together:
    Assistant offers the update within an hour, or immediately after
    **App Store -> three-dot menu -> Check for updates**.
 
-Pull requests build all three architectures with `--test` and push nothing, so a
+Pull requests build both architectures with `--test` and push nothing, so a
 broken Dockerfile is caught before it reaches GHCR.
 
 The workflow's `lint` job (`frenck/action-addon-linter`) gates the build: if it

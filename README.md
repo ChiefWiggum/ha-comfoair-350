@@ -5,7 +5,7 @@ A Home Assistant OS app wrapping
 <-> MQTT bridge for **Zehnder ComfoAir 350 / 500** ventilation units, with Home
 Assistant MQTT discovery.
 
-The image is built for aarch64 / amd64 / armv7 by GitHub Actions and published to
+The image is built for aarch64 and amd64 by GitHub Actions and published to
 GHCR, so installing pulls an image instead of building one on your Pi.
 
 > Since Home Assistant 2026.2, add-ons are called **apps** in the UI
