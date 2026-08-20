@@ -1,0 +1,40 @@
+# Local add-on manifest for the ComfoAir 350 serial->MQTT bridge.
+# Place this folder at /addons/ca350_bridge/ on HAOS, then:
+#   Settings -> Add-ons -> Add-on Store -> (menu) Check for updates
+#   -> "Local add-ons" -> ComfoAir 350 Bridge -> Install -> Start.
+name: "ComfoAir 350 Bridge"
+version: "1.0.0"
+slug: ca350_bridge
+description: "Zehnder ComfoAir 350 serial<->MQTT bridge (adorobis/hacomfoairmqtt) as a managed container"
+arch:
+  - aarch64          # Raspberry Pi 5
+startup: services
+boot: auto           # start automatically on boot
+init: false
+
+# Map the RS232 channel of the RainbowLink into the container.
+# Uses the STABLE by-id path so it survives renumbering.
+devices:
+  - /dev/serial/by-id/usb-wch.cn_USB_Quad_Serial_0123456789-if02
+
+# User-editable options (shown in the add-on Configuration tab):
+options:
+  serial_port: "/dev/serial/by-id/usb-wch.cn_USB_Quad_Serial_0123456789-if02"
+  rs485_protocol: false
+  enable_pc_mode: true
+  refresh_interval: 10
+  mqtt_server: "core-mosquitto"
+  mqtt_port: 1883
+  mqtt_user: "REPLACE_ME"
+  mqtt_password: "REPLACE_ME"
+  debug: false
+schema:
+  serial_port: str
+  rs485_protocol: bool
+  enable_pc_mode: bool
+  refresh_interval: int
+  mqtt_server: str
+  mqtt_port: int
+  mqtt_user: str
+  mqtt_password: str
+  debug: bool

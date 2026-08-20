@@ -98,3 +98,21 @@ Also confirm `HAEnableAutoDiscoverySensors=True` in `config.ini`.
 - Always use the **`by-id` serial path**, never the bare `ttyACMx`.
 - Keep the venv under **`/config`** (persists across reboots); never rely on packages
   installed into the add-on's system python (wiped on restart).
+
+## 7. Recurring ImportError: _PyType_AllocNoTrack: symbol not found (venv rot)
+
+**Symptom:** after a reboot, `/config/ca350.log` loops:
+`ImportError: Error relocating /usr/lib/python3.14/.../array...musl.so: _PyType_AllocNoTrack:
+symbol not found`. Card empty. Rebuilding the venv fixes it — until the next reboot.
+
+**Cause:** the venv lives in `/config` (persistent) but borrows the SSH add-on's Python
+interpreter and C-extensions, which live inside that add-on's container. When HAOS rebuilds
+the add-on (updates/reboots), those musl binaries change and the `/config` venv points at a
+mismatched interpreter. This is architectural, not a one-off — the venv-on-borrowed-Python
+approach is not stable on HAOS.
+
+**Durable fix:** stop using a `/config` venv + `shell_command`. Run the bridge as a **local
+add-on** (a container HA manages, carrying its own Python + pyserial). See `addon/`. It maps
+the `by-id` serial device in, restarts on boot, and cannot rot because it doesn't borrow
+HAOS's interpreter. After installing the add-on, remove the old automation and the
+`shell_command` block so they don't fight over the port / MQTT client id.

@@ -59,3 +59,10 @@ See `docs/SETUP.md` for the full installation, including the Python venv.
 - Bridge: https://github.com/adorobis/hacomfoairmqtt (adorobis)
 - Original Domoticz work: https://github.com/AlbertHakvoort/StorkAir-Zehnder-WHR-930-Domoticz-MQTT
 - Lovelace cards: https://github.com/mweimerskirch/lovelace-hacomfoairmqtt · https://github.com/TimWeyand/lovelace-comfoair
+
+## Recommended: run as a local add-on
+
+The `shell_command` + `/config` venv method proved fragile on HAOS (the venv rots on
+reboot — see docs/TROUBLESHOOTING.md #7). The **durable** setup is the local add-on in
+`addon/`, which runs the bridge as a container HA manages. Prefer that; the `config/` venv
+files are kept for reference/history.
