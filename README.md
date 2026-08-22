@@ -32,20 +32,18 @@ Full documentation: [`ca350_bridge/DOCS.md`](ca350_bridge/DOCS.md) (also shown i
 the app's Documentation tab). Release flow:
 [`docs/PUBLISHING.md`](docs/PUBLISHING.md).
 
-## Stosslüften / Fensterlüften
+## Stosslüften
 
 [`examples/ca350_boost.yaml`](examples/ca350_boost.yaml) is a Home Assistant
 package that adds what the card cannot do: a countdown that puts the unit back
 where it was.
 
-- **Stosslüften** — one press is Stufe 3 for 5 minutes; every further press adds
-  another 5 minutes to the running countdown (capped, default 60 min). At 0 the
-  level from before the first press returns.
-- **Fensterlüften** — same, but sets *absent* (+10 min per press) so the unit
-  stops pushing tempered air out while the windows are open.
-- **Stopp** — restores the previous level immediately.
+- One press → Stufe 3 for 5 minutes. Every further press adds another 5 minutes
+  to the running countdown, capped (default 60 min).
+- At 0 the level from before the first press returns.
+- **Stopp** restores the previous level immediately.
 
-Picking a level by hand (dashboard or CC-Luxe panel) drops the override and
+Picking a level by hand (dashboard or CC-Luxe panel) drops the countdown and
 stands. The remembered level lives in an `input_text` and the timer has
 `restore: true`, so a Home Assistant restart mid-countdown does not strand the
 unit at Stufe 3. Dashboard buttons are at the end of
@@ -85,7 +83,7 @@ docs/
   WIRING.md                         DB9 "RS232 - P.C." wiring + serial-device ID
   TROUBLESHOOTING.md                every issue hit, in order, with the fix
 examples/
-  ca350_boost.yaml                  Stosslüften / Fensterlüften package (countdown + restore)
+  ca350_boost.yaml                  Stosslüften package (countdown + restore)
 lovelace/
   comfoair-card.yaml                dashboard card examples + boost buttons
 tools/
