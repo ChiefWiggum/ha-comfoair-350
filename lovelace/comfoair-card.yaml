@@ -37,3 +37,47 @@ cards:
         name: Exhaust (out)
       - entity: binary_sensor.ca350_filterstatus
         name: Filter
+
+# --- Stoßlüften / Fensterlüften buttons ------------------------------------
+# Needs the package from examples/ca350_boost.yaml. Add as a Manual card below
+# your ComfoAir card. The timer row only appears while an override is running.
+#
+# type: vertical-stack
+# cards:
+#   - type: horizontal-stack
+#     cards:
+#       - type: button
+#         name: Stoßlüften
+#         icon: mdi:weather-windy
+#         tap_action:
+#           action: perform-action
+#           perform_action: script.ca350_stosslueften
+#       - type: button
+#         name: Fensterlüften
+#         icon: mdi:window-open-variant
+#         tap_action:
+#           action: perform-action
+#           perform_action: script.ca350_fensterlueften
+#       - type: button
+#         name: Abbrechen
+#         icon: mdi:close-circle-outline
+#         tap_action:
+#           action: perform-action
+#           perform_action: script.ca350_override_abbrechen
+#   - type: conditional
+#     conditions:
+#       - condition: state
+#         entity: timer.ca350_override
+#         state: active
+#     card:
+#       type: entities
+#       entities:
+#         - entity: timer.ca350_override
+#           name: Läuft noch
+#         - entity: input_text.ca350_level_before_override
+#           name: Zurück auf
+#   - type: entities
+#     title: Dauer
+#     entities:
+#       - entity: input_number.ca350_boost_minutes
+#       - entity: input_number.ca350_window_minutes
