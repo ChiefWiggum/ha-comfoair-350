@@ -32,25 +32,24 @@ Full documentation: [`ca350_bridge/DOCS.md`](ca350_bridge/DOCS.md) (also shown i
 the app's Documentation tab). Release flow:
 [`docs/PUBLISHING.md`](docs/PUBLISHING.md).
 
-## Stoßlüften / Fensterlüften
+## Stosslüften / Fensterlüften
 
 [`examples/ca350_boost.yaml`](examples/ca350_boost.yaml) is a Home Assistant
-package that adds what the card cannot do: hold a ventilation level for N minutes
-and then restore the previous one by itself — Stufe 3 for a burst after cooking
-or a shower, or *absent* while the windows are open so the unit stops pushing
-conditioned air outside. A level picked by hand (dashboard or CC-Luxe panel)
-cancels a running override, and the timer survives a Home Assistant restart.
-Dashboard buttons are at the end of
+package that adds what the card cannot do: a countdown that puts the unit back
+where it was.
+
+- **Stosslüften** — one press is Stufe 3 for 5 minutes; every further press adds
+  another 5 minutes to the running countdown (capped, default 60 min). At 0 the
+  level from before the first press returns.
+- **Fensterlüften** — same, but sets *absent* (+10 min per press) so the unit
+  stops pushing tempered air out while the windows are open.
+- **Stopp** — restores the previous level immediately.
+
+Picking a level by hand (dashboard or CC-Luxe panel) drops the override and
+stands. The remembered level lives in an `input_text` and the timer has
+`restore: true`, so a Home Assistant restart mid-countdown does not strand the
+unit at Stufe 3. Dashboard buttons are at the end of
 [`lovelace/comfoair-card.yaml`](lovelace/comfoair-card.yaml).
-
-> Alternative without GitHub: copy the `ca350_bridge/` folder into the `/addons`
-> share of your HAOS machine (Samba app) and it appears in the store under the
-> local section.
-
-> Coming from the old `/config` venv + `shell_command` method? Remove the
-> autostart automation and the `shell_command: start_ca350` block **before**
-> starting the app, or the two fight over the serial port and the MQTT client id.
-> See DOCS.md -> "Migrating from the /config venv method".
 
 ## The setup at a glance
 
@@ -86,7 +85,7 @@ docs/
   WIRING.md                         DB9 "RS232 - P.C." wiring + serial-device ID
   TROUBLESHOOTING.md                every issue hit, in order, with the fix
 examples/
-  ca350_boost.yaml                  Stoßlüften / Fensterlüften package (timed level override)
+  ca350_boost.yaml                  Stosslüften / Fensterlüften package (countdown + restore)
 lovelace/
   comfoair-card.yaml                dashboard card examples + boost buttons
 tools/

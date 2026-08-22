@@ -1,11 +1,13 @@
-# Stoßlüften / Fensterlüften for the ComfoAir 350 — a Home Assistant package.
+# Stosslüften / Fensterlüften for the ComfoAir 350 — a Home Assistant package.
 #
-# One mechanism: hold the ventilation level for N minutes, then put it back where
-# it was, by itself. Two wrappers on top of it:
+# Press once  -> Stufe 3 for 5 minutes.
+# Press again -> +5 minutes on the running countdown (and again, and again).
+# Countdown reaches 0 -> the level from before the first press comes back.
+# Stop button -> back to the previous level immediately.
 #
-#   script.ca350_stosslueften   -> fan_mode 'high'  (burst: cooking, shower, guests)
-#   script.ca350_fensterlueften -> fan_mode 'off'   (windows open: stop pushing
-#                                                    conditioned air outside)
+# Same mechanism, other direction: Fensterlüften sets *absent* while the windows
+# are open, so the unit stops pushing tempered air out into an open room. It is
+# additive too (+10 minutes per press by default).
 #
 # The unit's levels map to the climate entity's fan modes like this:
 #   off = absent (15 %) · low = Stufe 1 (25 %) · medium = Stufe 2 (40 %) · high = Stufe 3 (70 %)
@@ -28,123 +30,174 @@
 # add-on (trade-off documented in ca350_bridge/DOCS.md).
 
 input_number:
-  ca350_boost_minutes:
-    name: Stoßlüften Dauer
-    icon: mdi:timer-outline
+  ca350_boost_step:
+    name: Stosslüften pro Druck
+    icon: mdi:timer-plus-outline
     min: 1
-    max: 120
+    max: 60
     step: 1
-    initial: 15
+    initial: 5
     unit_of_measurement: min
     mode: box
 
-  ca350_window_minutes:
-    name: Fensterlüften Dauer
+  ca350_boost_max:
+    name: Stosslüften Maximum
+    icon: mdi:timer-alert-outline
+    min: 5
+    max: 240
+    step: 5
+    initial: 60
+    unit_of_measurement: min
+    mode: box
+
+  ca350_window_step:
+    name: Fensterlüften pro Druck
     icon: mdi:window-open-variant
     min: 1
-    max: 120
+    max: 60
     step: 1
     initial: 10
     unit_of_measurement: min
     mode: box
 
 input_text:
-  # The level to go back to. input_text survives a restart, so an override that
-  # outlives a Home Assistant restart still restores the right level.
+  # The level to go back to. Empty means "no override in flight". input_text
+  # survives a restart, so an override that outlives a Home Assistant restart
+  # still restores the right level.
   ca350_level_before_override:
     name: Stufe vor Override
     icon: mdi:backup-restore
     max: 10
     initial: ""
 
+  # The level the override itself is holding. Lets the manual-takeover
+  # automation tell "the unit confirmed our own change" from "someone picked a
+  # different level".
+  ca350_override_target:
+    name: Override Zielstufe
+    icon: mdi:target
+    max: 10
+    initial: ""
+
 timer:
   ca350_override:
-    name: Lüftung Override
+    name: Lüftung Restzeit
     icon: mdi:fan-clock
     # Keep counting across a restart instead of leaving the unit at Stufe 3.
     restore: true
 
 script:
   # ---------------------------------------------------------------- generic ---
-  ca350_override_level:
-    alias: ComfoAir Stufe zeitlich überschreiben
+  ca350_override_add:
+    alias: ComfoAir Stufe halten und Zeit addieren
     description: >-
-      Sets the ventilation level for a number of minutes, then restores the level
-      that was active before. Called by the two wrappers below.
-    mode: restart          # pressing again re-arms instead of queueing
+      Holds a ventilation level and adds `minutes` to the countdown. First call
+      remembers the current level and switches; every further call only extends,
+      up to `cap_minutes`. When the countdown ends the remembered level returns.
+    # queued, not restart: rapid presses must all add their minutes instead of
+    # cancelling each other mid-run.
+    mode: queued
+    max: 20
     fields:
       fan_mode:
         description: Target fan mode (off | low | medium | high)
         required: true
         example: high
       minutes:
-        description: How long to hold it
+        description: Minutes to add per call
         required: true
-        example: 15
+        example: 5
+      cap_minutes:
+        description: Never let the countdown exceed this
+        required: false
+        example: 60
+    variables:
+      running: "{{ is_state('timer.ca350_override', 'active') }}"
+      remaining_s: >-
+        {% if running and state_attr('timer.ca350_override', 'finishes_at') %}
+          {{ [ (as_timestamp(state_attr('timer.ca350_override', 'finishes_at')) - as_timestamp(now())) | round(0) | int, 0 ] | max }}
+        {% else %}
+          0
+        {% endif %}
+      cap_s: "{{ (cap_minutes | default(240) | int(240)) * 60 }}"
+      new_s: "{{ [ remaining_s | int + (minutes | int) * 60, cap_s | int ] | min }}"
     sequence:
-      # Only remember the current level if no override is running — otherwise a
-      # second press would store 'high' as the level to return to.
+      # Remember where to return to — only when nothing is in flight, so the
+      # second press does not store 'high' as the level to come back to.
       - if:
-          - condition: state
-            entity_id: timer.ca350_override
-            state: idle
+          - condition: template
+            value_template: "{{ states('input_text.ca350_level_before_override') | trim == '' }}"
         then:
           - action: input_text.set_value
             target:
               entity_id: input_text.ca350_level_before_override
             data:
               value: "{{ state_attr('climate.ca350_climate', 'fan_mode') | default('low', true) }}"
-      - action: climate.set_fan_mode
+      - action: input_text.set_value
         target:
-          entity_id: climate.ca350_climate
+          entity_id: input_text.ca350_override_target
         data:
-          fan_mode: "{{ fan_mode }}"
-      # Let the write reach the unit and the new level come back over MQTT before
-      # arming the timer. The bridge re-reads the level ~2 s after a set, and
-      # polls every refresh_interval (10 s by default). Without this pause the
-      # override's own change would look like manual operation and cancel itself.
-      - delay: "00:00:15"
+          value: "{{ fan_mode }}"
+      # Switch the unit only on the first press; later presses just add time.
+      - if:
+          - condition: template
+            value_template: "{{ not running }}"
+        then:
+          - action: climate.set_fan_mode
+            target:
+              entity_id: climate.ca350_climate
+            data:
+              fan_mode: "{{ fan_mode }}"
       - action: timer.start
         target:
           entity_id: timer.ca350_override
         data:
-          duration: "{{ '%02d:%02d:00' % ((minutes | int) // 60, (minutes | int) % 60) }}"
+          # timer.start on a running timer restarts it with this duration, which
+          # is exactly "remaining + minutes" (capped).
+          duration: "{{ '%02d:%02d:%02d' % ((new_s | int) // 3600, ((new_s | int) % 3600) // 60, (new_s | int) % 60) }}"
 
   # --------------------------------------------------------------- wrappers ---
   ca350_stosslueften:
-    alias: Stoßlüften
+    alias: Stosslüften (+5 min)
     icon: mdi:weather-windy
-    mode: restart
+    mode: queued
+    max: 20
     sequence:
-      - action: script.ca350_override_level
+      - action: script.ca350_override_add
         data:
           fan_mode: high
-          minutes: "{{ states('input_number.ca350_boost_minutes') | int(15) }}"
+          minutes: "{{ states('input_number.ca350_boost_step') | int(5) }}"
+          cap_minutes: "{{ states('input_number.ca350_boost_max') | int(60) }}"
 
   ca350_fensterlueften:
-    alias: Fensterlüften
+    alias: Fensterlüften (+10 min)
     icon: mdi:window-open-variant
-    mode: restart
+    mode: queued
+    max: 20
     sequence:
-      - action: script.ca350_override_level
+      - action: script.ca350_override_add
         data:
           fan_mode: "off"
-          minutes: "{{ states('input_number.ca350_window_minutes') | int(10) }}"
+          minutes: "{{ states('input_number.ca350_window_step') | int(10) }}"
+          cap_minutes: "{{ states('input_number.ca350_boost_max') | int(60) }}"
 
-  ca350_override_abbrechen:
-    alias: Override abbrechen
-    icon: mdi:close-circle-outline
+  ca350_override_stop:
+    alias: Stosslüften stoppen
+    icon: mdi:stop-circle-outline
+    mode: single
     sequence:
+      # Cancelling fires timer.cancelled, which the restore automation picks up —
+      # so the previous level comes back right away.
       - action: timer.cancel
         target:
           entity_id: timer.ca350_override
 
 automation:
-  # Timer ran out -> go back to the remembered level. (A cancel by the takeover
-  # automation below clears the memory first, so this then does nothing and the
-  # manually chosen level stands.)
+  # Countdown reached 0, or the stop button cancelled it -> restore the level
+  # from before the first press. (A manual takeover clears the memory first, so
+  # this then does nothing and the hand-picked level stands.)
   - id: ca350_override_restore
-    alias: ComfoAir - Stufe nach Override zurücksetzen
+    alias: ComfoAir - Stufe nach Stosslüften zurücksetzen
     triggers:
       - trigger: event
         event_type:
@@ -167,14 +220,18 @@ automation:
           entity_id: input_text.ca350_level_before_override
         data:
           value: ""
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.ca350_override_target
+        data:
+          value: ""
     mode: single
 
-  # Any level change while the override is armed means someone chose a level by
-  # hand (dashboard, or the CC-Luxe panel) — that wins, so drop the override.
-  # The override's own change happens before the timer starts, so it cannot
-  # trigger this.
+  # A level change to something other than what the override is holding means
+  # someone picked a level by hand (dashboard, or the CC-Luxe panel) — that wins,
+  # so drop the override without restoring.
   - id: ca350_override_manual_takeover
-    alias: ComfoAir - Override bei Handbedienung verwerfen
+    alias: ComfoAir - Stosslüften bei Handbedienung verwerfen
     triggers:
       - trigger: state
         entity_id: climate.ca350_climate
@@ -183,10 +240,19 @@ automation:
       - condition: state
         entity_id: timer.ca350_override
         state: active
+      - condition: template
+        value_template: >-
+          {{ trigger.to_state.attributes.fan_mode | string
+             != states('input_text.ca350_override_target') }}
     actions:
       - action: input_text.set_value
         target:
           entity_id: input_text.ca350_level_before_override
+        data:
+          value: ""
+      - action: input_text.set_value
+        target:
+          entity_id: input_text.ca350_override_target
         data:
           value: ""
       - action: timer.cancel

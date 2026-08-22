@@ -38,32 +38,34 @@ cards:
       - entity: binary_sensor.ca350_filterstatus
         name: Filter
 
-# --- Stoßlüften / Fensterlüften buttons ------------------------------------
+# --- Stosslüften / Fensterlüften buttons -----------------------------------
 # Needs the package from examples/ca350_boost.yaml. Add as a Manual card below
-# your ComfoAir card. The timer row only appears while an override is running.
+# your ComfoAir card. Each press of Stosslüften adds 5 minutes to the countdown;
+# Stopp puts the previous level back immediately. The countdown row only shows
+# while an override is running.
 #
 # type: vertical-stack
 # cards:
 #   - type: horizontal-stack
 #     cards:
 #       - type: button
-#         name: Stoßlüften
+#         name: Stosslüften +5
 #         icon: mdi:weather-windy
 #         tap_action:
 #           action: perform-action
 #           perform_action: script.ca350_stosslueften
 #       - type: button
-#         name: Fensterlüften
+#         name: Fensterlüften +10
 #         icon: mdi:window-open-variant
 #         tap_action:
 #           action: perform-action
 #           perform_action: script.ca350_fensterlueften
 #       - type: button
-#         name: Abbrechen
-#         icon: mdi:close-circle-outline
+#         name: Stopp
+#         icon: mdi:stop-circle-outline
 #         tap_action:
 #           action: perform-action
-#           perform_action: script.ca350_override_abbrechen
+#           perform_action: script.ca350_override_stop
 #   - type: conditional
 #     conditions:
 #       - condition: state
@@ -73,11 +75,12 @@ cards:
 #       type: entities
 #       entities:
 #         - entity: timer.ca350_override
-#           name: Läuft noch
+#           name: Restzeit
 #         - entity: input_text.ca350_level_before_override
 #           name: Zurück auf
 #   - type: entities
-#     title: Dauer
+#     title: Einstellungen
 #     entities:
-#       - entity: input_number.ca350_boost_minutes
-#       - entity: input_number.ca350_window_minutes
+#       - entity: input_number.ca350_boost_step
+#       - entity: input_number.ca350_window_step
+#       - entity: input_number.ca350_boost_max
